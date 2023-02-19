@@ -2,8 +2,8 @@
 // Created by li on 2023/02/11.
 //
 
-#ifndef FFMPEG_PROJECT_MEDIAFILE_H
-#define FFMPEG_PROJECT_MEDIAFILE_H
+#ifndef MEDIAFILE_H
+#define MEDIAFILE_H
 extern "C" {
 #include "libavformat/avformat.h"
 }
@@ -35,4 +35,4 @@ public:
 };
 
 
-#endif //FFMPEG_PROJECT_MEDIAFILE_H
+#endif //MEDIAFILE_H
