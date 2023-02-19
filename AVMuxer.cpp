@@ -31,7 +31,7 @@ void AVMuxer::setDir(DirUtil *dir) { this->dir = dir; }
 
 void AVMuxer::MuxAV(const char *OutPath) {
     if(this->dir->getFiles().size() == 0){
-        LOGI("No file to be processed in path: %s...", this->dir->getPath());
+        LOGI("No file to be processed in path: %s ...", this->dir->getPath());
         return;
     }
     const char *aspec = this->dir->getAudiospec();

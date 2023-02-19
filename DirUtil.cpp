@@ -28,7 +28,7 @@
 DirUtil::DirUtil(const char path[], char *audiospec, char *videospec) {
     this->path = path;
     if (!this->path) {
-        std::cout << "invalid path" << std::endl;
+        LOGE("invalid path: %s", this->path);
         this->path = GetPwd();
     } else if (!this->PathChecker())
         throw std::exception();
@@ -37,23 +37,23 @@ DirUtil::DirUtil(const char path[], char *audiospec, char *videospec) {
 };
 
 const char *DirUtil::GetPwd() {
-    std::cout << "get current path" << std::endl;
+    LOGD("get current path");
     const char *path = new char[256];
     path = getcwd(NULL, 128);
     if (path == nullptr) {
-        std::cout << "get path error" << std::endl;
+        LOGE("get path error");
         throw std::exception();
     }
-    std::cout << path << std::endl;
+    LOGD("current path has been get: %s", path);
     return path;
 }
 
 bool DirUtil::PathChecker() const {
     if (access(this->path, 2) == 0) {
-        std::cout << "valid dir path" << std::endl;
+        LOGD("valid dir path");
         return true;
     } else {
-        std::cout << "invalid dir path" << std::endl;
+        LOGE("invalid dir path");
         return false;
     }
 }
@@ -64,7 +64,7 @@ void DirUtil::GetTargetFiles(std::vector<std::string> &filenames, const char *fi
     DIR *pDir = opendir(path);
     struct dirent *ptr;
     if (!pDir) {
-        std::cout << "Open folder error" << std::endl;
+        LOGE("Open folder error： %s", path);
         throw std::exception();
     }
     if (filespec) {
@@ -100,7 +100,7 @@ int32_t DirUtil::OutEnvCheck(const char *output) const {
             int flag = mkdir(dir, S_IRWXU);  //Linux创建文件夹
 //#endif
             if (flag == 0) {  //创建成功
-                std::cout << "Create directory successfully." << std::endl;
+                LOGD("Create directory successfully.");
             } else { //创建失败
                 LOGE("Fail to create directory. %s", dir);
                 delete[] dir;
@@ -135,7 +135,7 @@ int32_t DirUtil::CreatePath(const char *dir) const {
             int flag = mkdir(str2.c_str(), S_IRWXU);  //Linux创建文件夹
 //#endif
             if (flag == 0) {  //创建成功
-                std::cout << "Create directory successfully." << std::endl;
+                LOGD("Create directory successfully.");
             } else { //创建失败
                 LOGE("Fail to create directory. %s", str2.c_str());
                 return -2;
@@ -150,7 +150,7 @@ int32_t DirUtil::CreatePath(const char *dir) const {
 void DirUtil::PreProcess(std::vector<std::string> &filenames, const char *filespec) {
     for (auto f: filenames) {
         f = this->getAbsolutePath(f);
-//        std::cout << (f.substr(0,  f.length() - strlen(filespec))).c_str() << std::endl;
+//        LOGD((f.substr(0,  f.length() - strlen(filespec))).c_str());
         LOGD("rename %s to %s", f.c_str(), (f.substr(0, f.length() - strlen(filespec))).c_str());
         rename(f.c_str(), (f.substr(0, f.length() - strlen(filespec))).c_str());
     }
@@ -175,8 +175,9 @@ void DirUtil::PreProcess(std::vector<std::string> &filenames, const char *filesp
         }
     }
 
-    for (auto f: filenames)
-        std::cout << f << std::endl;
+    for (auto f: filenames) {
+        LOGD("masked file: %s has been processed.", f.c_str());
+    }
     copy(filenames.begin(), filenames.end(), std::back_inserter(this->files));
 }
 

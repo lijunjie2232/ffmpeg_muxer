@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
     }
 
 
-    std::cout << ipath << std::endl;
+    LOGD("%s", ipath);
 
     DirUtil *dir = new DirUtil(ipath);
     dir->setVideospec(vspec);
