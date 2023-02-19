@@ -74,4 +74,4 @@ private:
 //    int32_t MuxerWrite(bool bVideoPkt, AVPacket *pInPacket);
 };
 
-#endif //FFMPEG_PROJECT_AVMUXER_H
+#endif //AVMUXER_H
