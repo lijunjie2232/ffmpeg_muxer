@@ -112,7 +112,7 @@ const char *getHelp() {
 
 void getVersion() {
 //    printf("\033[33;40m%s\033[0m", "Muxer version: muxer/0.1 by lijunjie2232\n\n");
-    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/0.1 by git@lijunjie2232\n\n");
+    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/0.2 by git@lijunjie2232\n\n");
 }
 
 int main(int argc, char **argv) {
