@@ -19,8 +19,8 @@
 7、关闭文件IO操作 avio_closep()、释放媒体格式上下文 avformat_free_context()
  */
 
-#ifndef FFMPEG_PROJECT_AVMUXER_H
-#define FFMPEG_PROJECT_AVMUXER_H
+#ifndef AVMUXER_H
+#define AVMUXER_H
 
 #include "DirUtil.h"
 extern "C" {
