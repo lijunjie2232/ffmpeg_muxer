@@ -25,52 +25,61 @@ FIX:AAC in some container format (FLV, MP4, MKV etc.) need
 AVMuxer::AVMuxer(DirUtil *dir, char *outputpath) {
     this->dir = dir;
     this->OutputDir = outputpath;
-
 }
 
-void AVMuxer::setDir(DirUtil *dir) {
-    this->dir = dir;
-}
-
+void AVMuxer::setDir(DirUtil *dir) { this->dir = dir; }
 
 void AVMuxer::MuxAV(const char *OutPath) {
     const char *aspec = this->dir->getAudiospec();
     const char *vspec = this->dir->getVideospec();
 
-    const char *opath = OutPath ? OutPath : this->OutputDir;
-    this->dir->OutEnvCheck(opath);
+    std::string opath;
+
+    if (OutPath)
+        opath = OutPath[0] == '/'
+                ? OutPath
+                : std::string(this->dir->getPath()) + "/" + OutPath;
+    else
+        opath = this->OutputDir[0] == '/'
+                ? this->OutputDir
+                : std::string(this->dir->getPath()) + "/" + this->OutputDir;
+
+    int res = this->dir->OutEnvCheck(opath.c_str());
+    if (res < 0){
+        LOGE("Error occur, OutEnvCheck exited with code %d", res);
+        return ;
+    };
 
     char *vpath = new char[256];
     char *apath = new char[256];
-
 
     for (auto file: this->dir->getFiles()) {
         char *outputfile = nullptr;
         this->Close();
         sprintf(vpath, "%s%c%s%s", this->dir->getPath(), '/', file.c_str(), vspec);
         sprintf(apath, "%s%c%s%s", this->dir->getPath(), '/', file.c_str(), aspec);
-//        this->Read((file + aspec).c_str());
-//        this->Read((file + vspec).c_str());
-        this->Read(vpath);//this->dir->getPath() + '/' + file + aspec
+        //        this->Read((file + aspec).c_str());
+        //        this->Read((file + vspec).c_str());
+        this->Read(vpath); // this->dir->getPath() + '/' + file + aspec
         this->Read(apath);
         if (this->m_pVFormatCtx == nullptr | this->m_pAFormatCtx == nullptr)
             continue;
         else {
-            outputfile = strdup((std::string(this->dir->getPath()) + "/" + opath + "/" + file +
-                                             this->dir->getVideospec()).c_str());
+            outputfile = strdup((opath + "/" + file + this->dir->getVideospec()).c_str());
             LOGI("processing %s", file.c_str());
             this->MuxerDo(outputfile);
             this->MuxerClose();
-            LOGI("%s has been been processed and output to %s", file.c_str(), outputfile);
+            LOGI("%s has been been processed and output to %s", file.c_str(),
+                 outputfile);
         }
         this->Close();
     }
     LOGI("%d media(s) has(have) been processed", this->dir->getFiles().size());
-    LOGI("output dir: %s", (std::string(this->dir->getPath()) + "/" + opath).c_str());
+    LOGI("output dir: %s",
+         (std::string(this->dir->getPath()) + "/" + opath).c_str());
     delete[] vpath;
     delete[] apath;
 }
-
 
 int32_t AVMuxer::Read(const char *pszFilePath) {
     AVCodec *pDecoder = nullptr;
@@ -79,9 +88,11 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
     LOGI("Media files: %s", pszFilePath);
 
     // 打开媒体文件
-    res = avformat_open_input(&this->m_pAvFormatCtx, pszFilePath, nullptr, nullptr);
+    res =
+            avformat_open_input(&this->m_pAvFormatCtx, pszFilePath, nullptr, nullptr);
     if (this->m_pAvFormatCtx == nullptr) {
-        LOGE("Avformat fail to open files, avformat_open_input() exit with res %d", res);
+        LOGE("Avformat fail to open files, avformat_open_input() exit with res %d",
+             res);
         return res;
     }
 
@@ -100,12 +111,14 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
         if (pAvStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             avformat_open_input(&this->m_pVFormatCtx, pszFilePath, nullptr, nullptr);
             LOGD("video stream");
-            if ((pAvStream->codecpar->width <= 0) || (pAvStream->codecpar->height <= 0)) {
+            if ((pAvStream->codecpar->width <= 0) ||
+                (pAvStream->codecpar->height <= 0)) {
                 LOGE("invalid resolution, streamIndex=%d", i);
                 continue;
             }
 
-            pDecoder = avcodec_find_decoder(pAvStream->codecpar->codec_id);  // 找到视频解码器
+            pDecoder =
+                    avcodec_find_decoder(pAvStream->codecpar->codec_id); // 找到视频解码器
             if (pDecoder == nullptr) {
                 LOGE("can not find video codec");
                 continue;
@@ -116,8 +129,9 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
                     this->Close();
                     return -1;
                 }
-                res = avcodec_parameters_to_context(this->m_pVidDecodeCtx,
-                                                    this->m_pAvFormatCtx->streams[this->m_nVidStreamIndex]->codecpar);
+                res = avcodec_parameters_to_context(
+                        this->m_pVidDecodeCtx,
+                        this->m_pAvFormatCtx->streams[this->m_nVidStreamIndex]->codecpar);
 
                 res = avcodec_open2(this->m_pVidDecodeCtx, nullptr, nullptr);
                 if (res != 0) {
@@ -130,22 +144,21 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
             this->m_nVidStreamIndex = i;
 
             LOGD("============Input Information=========");
-            LOGD("pxlFmt=%d, frameSize=%d*%d",
-                 (int) pAvStream->codecpar->format,
-                 pAvStream->codecpar->width,
-                 pAvStream->codecpar->height);
+            LOGD("pxlFmt=%d, frameSize=%d*%d", (int) pAvStream->codecpar->format,
+                 pAvStream->codecpar->width, pAvStream->codecpar->height);
             LOGD("======================================");
-
 
         } else if (pAvStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             avformat_open_input(&this->m_pAFormatCtx, pszFilePath, nullptr, nullptr);
             LOGD("audio stream");
-            if ((pAvStream->codecpar->channels <= 0) || (pAvStream->codecpar->sample_rate <= 0)) {
+            if ((pAvStream->codecpar->channels <= 0) ||
+                (pAvStream->codecpar->sample_rate <= 0)) {
                 LOGE("invalid resolution, streamIndex=%d", i);
                 continue;
             }
 
-            pDecoder = avcodec_find_decoder(pAvStream->codecpar->codec_id);  // 找到音频解码器
+            pDecoder =
+                    avcodec_find_decoder(pAvStream->codecpar->codec_id); // 找到音频解码器
             if (pDecoder == nullptr) {
                 LOGE("can not find Audio codec");
                 continue;
@@ -156,8 +169,9 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
                     this->Close();
                     return -1;
                 }
-                res = avcodec_parameters_to_context(this->m_pAudDecodeCtx,
-                                                    this->m_pAvFormatCtx->streams[this->m_nAudStreamIndex]->codecpar);
+                res = avcodec_parameters_to_context(
+                        this->m_pAudDecodeCtx,
+                        this->m_pAvFormatCtx->streams[this->m_nAudStreamIndex]->codecpar);
 
                 res = avcodec_open2(this->m_pAudDecodeCtx, nullptr, nullptr);
                 if (res != 0) {
@@ -171,12 +185,9 @@ int32_t AVMuxer::Read(const char *pszFilePath) {
 
             LOGD("============Input Information=========");
             LOGD("sample_fmt=%d, sampleRate=%d, channels=%d, chnl_layout=%lu",
-                 (int) pAvStream->codecpar->format,
-                 pAvStream->codecpar->sample_rate,
-                 pAvStream->codecpar->channels,
-                 pAvStream->codecpar->channel_layout);
+                 (int) pAvStream->codecpar->format, pAvStream->codecpar->sample_rate,
+                 pAvStream->codecpar->channels, pAvStream->codecpar->channel_layout);
             LOGD("======================================");
-
         }
     }
     this->Close();
@@ -198,15 +209,17 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     int res = 0;
 
     // 创建输出流格式上下文
-    res = avformat_alloc_output_context2(&this->m_pFormatCtx, nullptr, nullptr, pszFilePath);
+    res = avformat_alloc_output_context2(&this->m_pFormatCtx, nullptr, nullptr,
+                                         pszFilePath);
     if (nullptr == this->m_pFormatCtx || res < 0) {
         LOGE("<MuxerDo> [ERROR] fail to avformat_alloc_output_context2()\n");
         return -1;
     }
 
-// Add video stream to output steam
+    // Add video stream to output steam
     AVStream *in_vstream = this->m_pVFormatCtx->streams[this->m_nVidStreamIndex];
-    AVStream *out_vstream = avformat_new_stream(this->m_pFormatCtx, in_vstream->codec->codec);
+    AVStream *out_vstream =
+            avformat_new_stream(this->m_pFormatCtx, in_vstream->codec->codec);
     if (!out_vstream) {
         LOGE("Failed allocating output stream\n");
         this->Close();
@@ -216,7 +229,8 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     int videoindex_out = out_vstream->index;
 
     // Copy the settings of AVCodecContext
-    if (avcodec_parameters_from_context(out_vstream->codecpar, in_vstream->codec) < 0) {
+    if (avcodec_parameters_from_context(out_vstream->codecpar,
+                                        in_vstream->codec) < 0) {
         LOGE("Failed to copy context from input to output stream codec context");
         return -1;
     }
@@ -224,10 +238,10 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     if (this->m_pFormatCtx->oformat->flags & AVFMT_GLOBALHEADER)
         out_vstream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-
-// Add audio stream to output steam
+    // Add audio stream to output steam
     AVStream *in_astream = this->m_pAFormatCtx->streams[m_nAudStreamIndex];
-    AVStream *out_astream = avformat_new_stream(this->m_pFormatCtx, in_astream->codec->codec);
+    AVStream *out_astream =
+            avformat_new_stream(this->m_pFormatCtx, in_astream->codec->codec);
     if (!out_astream) {
         LOGE("Failed allocating output stream");
         return 1;
@@ -236,15 +250,14 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     int audioindex_out = out_astream->index;
 
     // Copy the settings of AVCodecContext
-    if (avcodec_parameters_from_context(out_astream->codecpar, in_astream->codec) < 0) {
+    if (avcodec_parameters_from_context(out_astream->codecpar,
+                                        in_astream->codec) < 0) {
         LOGE("Failed to copy context from input to output stream codec context");
         return -1;
     }
     out_astream->codec->codec_tag = 0;
     if (this->m_pFormatCtx->oformat->flags & AVFMT_GLOBALHEADER)
         out_astream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-
-
 
     // 打开文件IO上下文
     res = avio_open(&this->m_pFormatCtx->pb, pszFilePath, AVIO_FLAG_WRITE);
@@ -268,10 +281,11 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     int64_t cur_pts_v = 0, cur_pts_a = 0;
 
 #if USE_H264BSF
-    AVBitStreamFilterContext* h264bsfc =  av_bitstream_filter_init("h264_mp4toannexb");
+    AVBitStreamFilterContext *h264bsfc =
+        av_bitstream_filter_init("h264_mp4toannexb");
 #endif
 #if USE_AACBSF
-    AVBitStreamFilterContext* aacbsfc =  av_bitstream_filter_init("aac_adtstoasc");
+    AVBitStreamFilterContext *aacbsfc = av_bitstream_filter_init("aac_adtstoasc");
 #endif
 
     AVPacket pkt;
@@ -282,7 +296,8 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
         int stream_index = 0;
 
         // Get an AVPacket
-        if (av_compare_ts(cur_pts_v, out_vstream->time_base, cur_pts_a, out_astream->time_base) <= 0) {
+        if (av_compare_ts(cur_pts_v, out_vstream->time_base, cur_pts_a,
+                          out_astream->time_base) <= 0) {
             ifmt_ctx = this->m_pVFormatCtx;
             stream_index = videoindex_out;
 
@@ -310,47 +325,53 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
             } else {
                 break;
             }
-
         }
 
         in_stream = ifmt_ctx->streams[pkt.stream_index];
         out_stream = this->m_pFormatCtx->streams[stream_index];
 
 #if USE_H264BSF
-        av_bitstream_filter_filter(h264bsfc, in_stream->codec, NULL, &pkt.data, &pkt.size, pkt.data, pkt.size, 0);
+        av_bitstream_filter_filter(h264bsfc, in_stream->codec, NULL, &pkt.data,
+                                   &pkt.size, pkt.data, pkt.size, 0);
 #endif
 #if USE_AACBSF
-        av_bitstream_filter_filter(aacbsfc, in_stream->codec, NULL, &pkt.data, &pkt.size, pkt.data, pkt.size, 0);
+        av_bitstream_filter_filter(aacbsfc, in_stream->codec, NULL, &pkt.data,
+                                   &pkt.size, pkt.data, pkt.size, 0);
 #endif
         if (pkt.pts == AV_NOPTS_VALUE) {
-            //Write PTS
+            // Write PTS
             AVRational time_base1 = in_stream->time_base;
-            //Duration between 2 frames (us)
-            int64_t calc_duration = (double) AV_TIME_BASE / av_q2d(in_stream->r_frame_rate);
-            //Parameters
-            pkt.pts = (double) (frame_index * calc_duration) / (double) (av_q2d(time_base1) * AV_TIME_BASE);
+            // Duration between 2 frames (us)
+            int64_t calc_duration =
+                    (double) AV_TIME_BASE / av_q2d(in_stream->r_frame_rate);
+            // Parameters
+            pkt.pts = (double) (frame_index * calc_duration) /
+                      (double) (av_q2d(time_base1) * AV_TIME_BASE);
             pkt.dts = pkt.pts;
-            pkt.duration = (double) calc_duration / (double) (av_q2d(time_base1) * AV_TIME_BASE);
+            pkt.duration =
+                    (double) calc_duration / (double) (av_q2d(time_base1) * AV_TIME_BASE);
             frame_index++;
         }
         /* copy packet */
         // Convert PTS/DTS
-        pkt.pts = av_rescale_q_rnd(pkt.pts, in_stream->time_base, out_stream->time_base,
-                                   (enum AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
-        pkt.dts = av_rescale_q_rnd(pkt.dts, in_stream->time_base, out_stream->time_base,
-                                   (enum AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
-        pkt.duration = av_rescale_q(pkt.duration, in_stream->time_base, out_stream->time_base);
+        pkt.pts = av_rescale_q_rnd(
+                pkt.pts, in_stream->time_base, out_stream->time_base,
+                (enum AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+        pkt.dts = av_rescale_q_rnd(
+                pkt.dts, in_stream->time_base, out_stream->time_base,
+                (enum AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+        pkt.duration =
+                av_rescale_q(pkt.duration, in_stream->time_base, out_stream->time_base);
         pkt.pos = -1;
         pkt.stream_index = stream_index;
 
-//        LOGD("Write 1 Packet. size:%5d\tpts:%8d", pkt.size, pkt.pts);
+        //        LOGD("Write 1 Packet. size:%5d\tpts:%8d", pkt.size, pkt.pts);
         // Write
         if (av_interleaved_write_frame(this->m_pFormatCtx, &pkt) < 0) {
             LOGE("Error muxing packet");
             break;
         }
         av_free_packet(&pkt);
-
     }
     // Write file trailer
     if (this->m_pFormatCtx != nullptr) {
@@ -370,7 +391,6 @@ int32_t AVMuxer::MuxerDo(const char *pszFilePath) {
     return 0;
 }
 
-
 void AVMuxer::MuxerClose() {
 
     // 先关IO上下文
@@ -386,7 +406,6 @@ void AVMuxer::MuxerClose() {
     }
 
     // 流文件直接在 avformat_free_context()内部已经销毁了
-
 
     avformat_close_input(&m_pVFormatCtx);
     avformat_close_input(&m_pAFormatCtx);
@@ -412,7 +431,7 @@ void AVMuxer::MuxerClose() {
 //  * @return 无
 //  *
 //  */
-//int32_t AVMuxer::MuxerWrite(bool bVideoPkt, AVPacket *pInPacket) {
+// int32_t AVMuxer::MuxerWrite(bool bVideoPkt, AVPacket *pInPacket) {
 //    // 设置写入数据包的流索引
 //    if (bVideoPkt) {
 //        pInPacket->stream_index = this->m_pVideoStream->index;

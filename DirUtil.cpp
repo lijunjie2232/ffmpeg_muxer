@@ -87,25 +87,65 @@ void DirUtil::GetTargetFiles(std::vector<std::string> &filenames, const char *fi
     closedir(pDir);
 }
 
-void DirUtil::OutEnvCheck(const char *output) const {
-    char *dir = new char[256];
-    sprintf(dir, "%s%s%s", this->path, "/" , output);
-    if (access(dir, 0) == -1) {
-#ifdef WIN32
-        int flag = mkdir(dir.c_str());  //Windows创建文件夹
-#elifdef linux
-        int flag = mkdir(dir, S_IRWXU);  //Linux创建文件夹
-#endif
-        if (flag == 0) {  //创建成功
-            std::cout << "Create directory successfully." << std::endl;
-        } else { //创建失败
-            std::cout << "Fail to create directory." << std::endl;
-            throw std::exception();
+int32_t DirUtil::OutEnvCheck(const char *output) const {
+
+    if (output[0] != '/') {
+        char *dir = new char[256];
+        sprintf(dir, "%s%s%s", this->path, "/", output);
+        if (access(dir, 0) == -1) {
+            //创建目录文件
+//#ifdef WIN32
+//                int flag = mkdir(dir);  //Windows创建文件夹
+//#elifdef linux
+            int flag = mkdir(dir, S_IRWXU);  //Linux创建文件夹
+//#endif
+            if (flag == 0) {  //创建成功
+                std::cout << "Create directory successfully." << std::endl;
+            } else { //创建失败
+                LOGE("Fail to create directory. %s", dir);
+                delete[] dir;
+                return -2;
+            }
+        }
+        delete[] dir;
+    } else {
+        if (access(output, 0) == -1) {
+            return this->CreatePath(output);
         }
     }
-    delete[] dir;
+    return 0;
 }
 
+int32_t DirUtil::CreatePath(const char *dir) const {
+    int m = 0;
+    std::string str1, str2;
+    str1 = dir;
+    str2 = str1.substr(0, 1);
+    str1 = str1.substr(1, str1.size());
+    str1 += '/';
+    m = str1.find('/');
+    while (m >= 0) {
+        str2 += str1.substr(0, m + 1);
+        //判断该目录是否存在
+        if (access(str2.c_str(), 0) == -1) {
+            //创建目录文件
+//#ifdef WIN32
+//                int flag = mkdir(dstr2.c_str());  //Windows创建文件夹
+//#elifdef linux
+            int flag = mkdir(str2.c_str(), S_IRWXU);  //Linux创建文件夹
+//#endif
+            if (flag == 0) {  //创建成功
+                std::cout << "Create directory successfully." << std::endl;
+            } else { //创建失败
+                LOGE("Fail to create directory. %s", str2.c_str());
+                return -2;
+            }
+        }
+        str1 = str1.substr(m + 1, str1.size());
+        m = str1.find('/');
+    }
+    return 0;
+}
 
 void DirUtil::PreProcess(std::vector<std::string> &filenames, const char *filespec) {
     for (auto f: filenames) {
@@ -172,7 +212,7 @@ const char *DirUtil::getPath() const {
 
 char *DirUtil::getAbsolutePath(std::string filename, const char *spec) {
     std::string abpath = std::string(this->path) + "/" + filename;
-    if(spec != nullptr)
+    if (spec != nullptr)
         abpath += spec;
     return strdup(abpath.c_str());
 }

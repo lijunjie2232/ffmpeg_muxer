@@ -42,8 +42,9 @@ public:
 
     void PreProcess(std::vector<std::string> &filenames, const char *filespec);
 
-    void OutEnvCheck(const char *output = "output") const;
+    int32_t OutEnvCheck(const char *output = "./output") const;
 
+    int32_t CreatePath(const char *dir) const;
 
 };
 
