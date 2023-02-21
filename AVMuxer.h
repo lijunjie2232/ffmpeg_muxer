@@ -38,7 +38,7 @@ public:
 
 private:
     // input media info
-    AVFormatContext *m_pAvFormatCtx; // 流文件解析上下文
+//    AVFormatContext *m_pAvFormatCtx; // 流文件解析上下文
     AVFormatContext *m_pVFormatCtx; // 视频流文件解析上下文
     AVFormatContext *m_pAFormatCtx; // 音频流文件解析上下文
     AVCodecContext *m_pVidDecodeCtx; // 视频解码器上下文
@@ -70,6 +70,7 @@ private:
     int32_t MuxerDo(const char *pszFilePath);
 
     void MuxerClose();
+
 
 //    int32_t MuxerWrite(bool bVideoPkt, AVPacket *pInPacket);
 };

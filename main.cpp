@@ -10,90 +10,89 @@
 #include "AVMuxer.h"
 
 
-
-void color_test() {
-    std::cout << "这是原始颜色" << std::endl;
-    std::cout << "\033[30;11m这是前景黑色\033[0m" << std::endl;
-    std::cout << "\033[31;11m这是前景红色\033[0m" << std::endl;
-    std::cout << "\033[32;11m这是前景绿色\033[0m" << std::endl;
-    std::cout << "\033[33;11m这是前景黄色\033[0m" << std::endl;
-    std::cout << "\033[34;11m这是前景蓝色\033[0m" << std::endl;
-    std::cout << "\033[35;11m这是前景紫色\033[0m" << std::endl;
-    std::cout << "\033[36;11m这是前景青色\033[0m" << std::endl;
-    std::cout << "\033[37;11m这是前景白色\033[0m" << std::endl;
-    std::cout << "这是原始颜色" << std::endl;
-    std::cout << "\033[;40m这是背景黑色\033[0m" << std::endl;
-    std::cout << "\033[;41m这是背景红色\033[0m" << std::endl;
-    std::cout << "\033[;42m这是背景绿色\033[0m" << std::endl;
-    std::cout << "\033[;43m这是背景黄色\033[0m" << std::endl;
-    std::cout << "\033[;44m这是背景蓝色\033[0m" << std::endl;
-    std::cout << "\033[;45m这是背景紫色\033[0m" << std::endl;
-    std::cout << "\033[;46m这是背景青色\033[0m" << std::endl;
-    std::cout << "\033[;47m这是背景白色\033[0m" << std::endl;
-}
-
-void test() {
-    const char *filename = "/home/li/data/code/c/ffmpeg_project/cmake-build-debug/ffmpeg_project/暗示伏尔泰.cpp";
-    std::cout << filename << std::endl << std::string(filename).data() << std::endl << std::string(filename).c_str()
-              << std::endl;
-    const char *ap = ".cpp";
-    auto spt = strstr(filename, ap);
-    std::cout << spt << std::endl;
-    if (strlen(ap) == strlen(spt))
-        std::cout << "true" << std::endl;
-    else
-        std::cout << "ap: " << ap << " spt: " << spt << std::endl;
-    std::cout << spt - filename << " " << strlen(filename) << std::endl;
-    for (auto *pt = filename; pt != spt; pt++)
-        std::cout << *pt;
-    std::cout << std::endl;
-    std::cout << std::string(filename).substr(0, spt - filename) << std::endl;
-}
-
-void file_junbe() {
-    std::cout << "Hello, World!" << std::endl;
-    const char *path = "/home/li/data/Videos/test";
-//    char *path;
-//    path = new char[256];
-//    std::cin.getline(path, 256);
-//    std::cout << path << std::endl;
-    DirUtil dir = DirUtil(path);
-    dir.setAudiospec(".mp3");
-    dir.setVideospec(".mp4");
-    std::vector<std::string> filenames;
-    const char *filespec = ".pdf";
-    dir.GetTargetFiles(filenames, filespec);
-    dir.PreProcess(filenames, filespec);
-}
-
-void test2() {
-    const char *FileName1 = "/home/li/data/Videos/test/01_Study Japanese 日常生活常用形容詞 第一課  赤い.mp4";
-    MediaFile media = MediaFile(FileName1);
-    media.Info();
-    media.Close();
-    const char *FileName2 = "/home/li/data/Videos/test/01_Study Japanese 日常生活常用形容詞 第一課  赤い.mp3";
-    media.Open(FileName2);
-    media.Info();
-    media.Close();
-}
-
-void test3() {
-    LOGD("Hello, World!");
-    const char *path = "/home/li/data/Videos/test";
-//    char *path;
-//    path = new char[256];
-//    std::cin.getline(path, 256);
-//    std::cout << path << std::endl;
-    DirUtil *dir = new DirUtil(path);
-    dir->setAudiospec(".mp3");
-    dir->setVideospec(".mp4");
-    std::vector<std::string> filenames;
-    const char *maskspec = ".pdf";
-    dir->GetTargetFiles(filenames, maskspec);
-    dir->PreProcess(filenames, maskspec);
-    AVMuxer muxer = AVMuxer(dir, "output");
-//    muxer.MuxAV();
-}
+//void color_test() {
+//    std::cout << "这是原始颜色" << std::endl;
+//    std::cout << "\033[30;11m这是前景黑色\033[0m" << std::endl;
+//    std::cout << "\033[31;11m这是前景红色\033[0m" << std::endl;
+//    std::cout << "\033[32;11m这是前景绿色\033[0m" << std::endl;
+//    std::cout << "\033[33;11m这是前景黄色\033[0m" << std::endl;
+//    std::cout << "\033[34;11m这是前景蓝色\033[0m" << std::endl;
+//    std::cout << "\033[35;11m这是前景紫色\033[0m" << std::endl;
+//    std::cout << "\033[36;11m这是前景青色\033[0m" << std::endl;
+//    std::cout << "\033[37;11m这是前景白色\033[0m" << std::endl;
+//    std::cout << "这是原始颜色" << std::endl;
+//    std::cout << "\033[;40m这是背景黑色\033[0m" << std::endl;
+//    std::cout << "\033[;41m这是背景红色\033[0m" << std::endl;
+//    std::cout << "\033[;42m这是背景绿色\033[0m" << std::endl;
+//    std::cout << "\033[;43m这是背景黄色\033[0m" << std::endl;
+//    std::cout << "\033[;44m这是背景蓝色\033[0m" << std::endl;
+//    std::cout << "\033[;45m这是背景紫色\033[0m" << std::endl;
+//    std::cout << "\033[;46m这是背景青色\033[0m" << std::endl;
+//    std::cout << "\033[;47m这是背景白色\033[0m" << std::endl;
+//}
+//
+//void test() {
+//    const char *filename = "/home/li/data/code/c/ffmpeg_project/cmake-build-debug/ffmpeg_project/暗示伏尔泰.cpp";
+//    std::cout << filename << std::endl << std::string(filename).data() << std::endl << std::string(filename).c_str()
+//              << std::endl;
+//    const char *ap = ".cpp";
+//    auto spt = strstr(filename, ap);
+//    std::cout << spt << std::endl;
+//    if (strlen(ap) == strlen(spt))
+//        std::cout << "true" << std::endl;
+//    else
+//        std::cout << "ap: " << ap << " spt: " << spt << std::endl;
+//    std::cout << spt - filename << " " << strlen(filename) << std::endl;
+//    for (auto *pt = filename; pt != spt; pt++)
+//        std::cout << *pt;
+//    std::cout << std::endl;
+//    std::cout << std::string(filename).substr(0, spt - filename) << std::endl;
+//}
+//
+//void file_junbe() {
+//    std::cout << "Hello, World!" << std::endl;
+//    const char *path = "/home/li/data/Videos/test";
+////    char *path;
+////    path = new char[256];
+////    std::cin.getline(path, 256);
+////    std::cout << path << std::endl;
+//    DirUtil dir = DirUtil(path);
+//    dir.setAudiospec(".mp3");
+//    dir.setVideospec(".mp4");
+//    std::vector<std::string> filenames;
+//    const char *filespec = ".pdf";
+//    dir.GetTargetFiles(filenames, filespec);
+//    dir.PreProcess(filenames, filespec);
+//}
+//
+//void test2() {
+//    const char *FileName1 = "/home/li/data/Videos/test/01_Study Japanese 日常生活常用形容詞 第一課  赤い.mp4";
+//    MediaFile media = MediaFile(FileName1);
+//    media.Info();
+//    media.Close();
+//    const char *FileName2 = "/home/li/data/Videos/test/01_Study Japanese 日常生活常用形容詞 第一課  赤い.mp3";
+//    media.Open(FileName2);
+//    media.Info();
+//    media.Close();
+//}
+//
+//void test3() {
+//    LOGD("Hello, World!");
+//    const char *path = "/home/li/data/Videos/test";
+////    char *path;
+////    path = new char[256];
+////    std::cin.getline(path, 256);
+////    std::cout << path << std::endl;
+//    DirUtil *dir = new DirUtil(path);
+//    dir->setAudiospec(".mp3");
+//    dir->setVideospec(".mp4");
+//    std::vector<std::string> filenames;
+//    const char *maskspec = ".pdf";
+//    dir->GetTargetFiles(filenames, maskspec);
+//    dir->PreProcess(filenames, maskspec);
+//    AVMuxer muxer = AVMuxer(dir, "output");
+////    muxer.MuxAV();
+//}
 
 
 const char *getHelp() {
@@ -111,17 +110,27 @@ const char *getHelp() {
 }
 
 void getVersion() {
-//    printf("\033[33;40m%s\033[0m", "Muxer version: muxer/0.1 by lijunjie2232\n\n");
-    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/0.2 by git@lijunjie2232\n\n");
+    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/0.3 by git@lijunjie2232\n\n");
 }
 
+void refresh_test() {
+    char *status = new char[51];
+    memset(status, ' ', sizeof(char) * 51);
+
+    for (int i = 0; i <= 100; i++) {
+        status[i / 2] = '=';
+        if (i % 2)
+            status[i / 2 + 1] = '-';
+        printf("\rprogress|%s|%d%%", status, i);
+        fflush(stdout);
+        sleep(1);
+    }
+    delete[] status;
+}
+
+
 int main(int argc, char **argv) {
-//    file_junbe();
-//    test2();
-//    test3();
-//    color_test();
-//    if (path != NULL)
-//        delete[] path;
+
 
     char *ipath = nullptr;
     bool ipath_n = false;
@@ -135,7 +144,6 @@ int main(int argc, char **argv) {
     bool aspec_n = true;
     int i = 1;
     while (i < argc) {
-//        LOGD("args%d: %s", i, argv[i]);
         if (!strcmp(argv[i], "-h") | !strcmp(argv[i], "--help")) {
             getVersion();
             getHelp();
@@ -199,13 +207,7 @@ int main(int argc, char **argv) {
     delete dir;
     if (ipath_n)
         delete[] ipath;
-//    if (odir_n)
-//        delete[] odir;
-//    if (maskspec_n)
-//        delete[] maskspec;
-//    if (vspec_n)
-//        delete[] vspec;
-//    if (aspec_n)
-//        delete[] aspec;
+
+
     return 0;
 }
