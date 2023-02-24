@@ -97,20 +97,20 @@
 
 const char *getHelp() {
     std::cout << "Usage:\n"
-                 "muxer [-h] [-o outputpath] [-d inputpath]\n"
-                 "[-ms masksuffx] [-vs videosuffx] [-as audiosuffx]\n\n"
+                 "\tmuxer [-h] [-o outputpath] [-d inputpath]\n"
+                 "\t[-ms masksuffx] [-vs videosuffx] [-as audiosuffx]\n\n"
                  "options:\n"
-                 "-h   --help        : get help\n"
-                 "-o   --output_dir  : output dir\n"
-                 "-d   --input_dir   : input fir\n"
-                 "-ms  --masksuffx   : suffx of mask\n"
-                 "-vs  --videosuffx  : suffx of video\n"
-                 "-as  --audiosuffx  : suffx of audio\n"
+                 "\t-h   --help        : get help\n"
+                 "\t-o   --output_dir  : output dir\n"
+                 "\t-d   --input_dir   : input fir\n"
+                 "\t-ms  --masksuffx   : suffx of mask\n"
+                 "\t-vs  --videosuffx  : suffx of video\n"
+                 "\t-as  --audiosuffx  : suffx of audio\n"
               << std::endl;
 }
 
 void getVersion() {
-    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/0.3 by git@lijunjie2232\n\n");
+    printf("\033[33;11m%s\033[0m", "Muxer version: muxer/1.0 by git@lijunjie2232\n\n");
 }
 
 void refresh_test() {
