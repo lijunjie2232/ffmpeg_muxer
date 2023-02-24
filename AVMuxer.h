@@ -44,10 +44,6 @@ private:
 
     int32_t Muxer(const char* in_vpath, const char* in_apath, const char *pszFilePath);
 
-    void MuxerClose();
-
-
-//    int32_t MuxerWrite(bool bVideoPkt, AVPacket *pInPacket);
 };
 
 #endif //AVMUXER_H

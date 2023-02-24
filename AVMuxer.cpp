@@ -361,7 +361,3 @@ int32_t AVMuxer::Muxer(const char *in_vpath, const char *in_apath, const char *o
 
     return 0;
 }
-
-void AVMuxer::MuxerClose() {
-
-}
