@@ -74,7 +74,6 @@ void AVMuxer::MuxAV(const char *OutPath) {
         LOGI("processing %s", file.c_str());
         this->Muxer(vpath, apath, outputfile);
         LOGI("%s has been been processed and output to %s", file.c_str(), outputfile);
-        this->MuxerClose();
     }
     LOGI("%d media(s) has(have) been processed", this->dir->getFiles().size());
     LOGI("output dir: %s",
