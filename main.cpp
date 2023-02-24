@@ -76,23 +76,23 @@
 //    media.Close();
 //}
 //
-//void test3() {
-//    LOGD("Hello, World!");
-//    const char *path = "/home/li/data/Videos/test";
-////    char *path;
-////    path = new char[256];
-////    std::cin.getline(path, 256);
-////    std::cout << path << std::endl;
-//    DirUtil *dir = new DirUtil(path);
-//    dir->setAudiospec(".mp3");
-//    dir->setVideospec(".mp4");
-//    std::vector<std::string> filenames;
-//    const char *maskspec = ".pdf";
-//    dir->GetTargetFiles(filenames, maskspec);
-//    dir->PreProcess(filenames, maskspec);
-//    AVMuxer muxer = AVMuxer(dir, "output");
-////    muxer.MuxAV();
-//}
+void test3() {
+    LOGD("Hello, World!");
+    const char *path = "/home/li/data/Videos/test/space test/";
+//    char *path;
+//    path = new char[256];
+//    std::cin.getline(path, 256);
+//    std::cout << path << std::endl;
+    DirUtil *dir = new DirUtil(path);
+    dir->setAudiospec(".mp3");
+    dir->setVideospec(".mp4");
+    std::vector<std::string> filenames;
+    const char *maskspec = ".pdf";
+    dir->GetTargetFiles(filenames, maskspec);
+    dir->PreProcess(filenames, maskspec);
+    AVMuxer muxer = AVMuxer(dir, "output");
+    muxer.MuxAV();
+}
 
 
 const char *getHelp() {
@@ -131,82 +131,84 @@ void refresh_test() {
 
 int main(int argc, char **argv) {
 
+    test3();
 
-    char *ipath = nullptr;
-    bool ipath_n = false;
-    char *odir = nullptr;
-    bool odir_n = true;
-    char *maskspec = nullptr;
-    bool maskspec_n = true;
-    char *vspec = nullptr;
-    bool vspec_n = true;
-    char *aspec = nullptr;
-    bool aspec_n = true;
-    int i = 1;
-    while (i < argc) {
-        if (!strcmp(argv[i], "-h") | !strcmp(argv[i], "--help")) {
-            getVersion();
-            getHelp();
-            return 0;
-        } else if (!strcmp(argv[i], "-d") | !strcmp(argv[i], "--input_dir")) {
-            ipath = argv[++i];
-        } else if (!strcmp(argv[i], "-v") | !strcmp(argv[i], "--version")) {
-            getVersion();
-            return 0;
-        } else if (!strcmp(argv[i], "-o") | !strcmp(argv[i], "--output_dir")) {
-            odir = argv[++i];
-        } else if (!strcmp(argv[i], "-ms") | !strcmp(argv[i], "--masksuffx")) {
-            maskspec = argv[++i];
-        } else if (!strcmp(argv[i], "-vs") | !strcmp(argv[i], "--videosuffx")) {
-            vspec = argv[++i];
-        } else if (!strcmp(argv[i], "-as") | !strcmp(argv[i], "--audiosuffx")) {
-            aspec = argv[++i];
-        }
-        i++;
-    }
-
-    getVersion();
-
-    if (ipath == nullptr) {
-        ipath = new char[512];
-        ipath_n = true;
-        std::cout << "Enter input dir path:" << std::endl;
-        std::cin.getline(ipath, 512);
-    }
-    if (odir == nullptr) {
-        odir_n = false;
-        odir = "output";
-    }
-
-    if (maskspec == nullptr) {
-        maskspec_n = false;
-        maskspec = ".pdf";
-    }
-
-    if (vspec == nullptr) {
-        vspec_n = false;
-        vspec = ".mp4";
-    }
-
-    if (aspec == nullptr) {
-        aspec_n = false;
-        aspec = ".mp3";
-    }
-
-
-    LOGD("%s", ipath);
-
-    DirUtil *dir = new DirUtil(ipath);
-    dir->setVideospec(vspec);
-    dir->setAudiospec(aspec);
-    std::vector<std::string> filenames;
-    dir->GetTargetFiles(filenames, maskspec);
-    dir->PreProcess(filenames, maskspec);
-    AVMuxer muxer = AVMuxer(dir, odir);
-    muxer.MuxAV();
-    delete dir;
-    if (ipath_n)
-        delete[] ipath;
+//
+//    char *ipath = nullptr;
+//    bool ipath_n = false;
+//    char *odir = nullptr;
+//    bool odir_n = true;
+//    char *maskspec = nullptr;
+//    bool maskspec_n = true;
+//    char *vspec = nullptr;
+//    bool vspec_n = true;
+//    char *aspec = nullptr;
+//    bool aspec_n = true;
+//    int i = 1;
+//    while (i < argc) {
+//        if (!strcmp(argv[i], "-h") | !strcmp(argv[i], "--help")) {
+//            getVersion();
+//            getHelp();
+//            return 0;
+//        } else if (!strcmp(argv[i], "-d") | !strcmp(argv[i], "--input_dir")) {
+//            ipath = argv[++i];
+//        } else if (!strcmp(argv[i], "-v") | !strcmp(argv[i], "--version")) {
+//            getVersion();
+//            return 0;
+//        } else if (!strcmp(argv[i], "-o") | !strcmp(argv[i], "--output_dir")) {
+//            odir = argv[++i];
+//        } else if (!strcmp(argv[i], "-ms") | !strcmp(argv[i], "--masksuffx")) {
+//            maskspec = argv[++i];
+//        } else if (!strcmp(argv[i], "-vs") | !strcmp(argv[i], "--videosuffx")) {
+//            vspec = argv[++i];
+//        } else if (!strcmp(argv[i], "-as") | !strcmp(argv[i], "--audiosuffx")) {
+//            aspec = argv[++i];
+//        }
+//        i++;
+//    }
+//
+//    getVersion();
+//
+//    if (ipath == nullptr) {
+//        ipath = new char[512];
+//        ipath_n = true;
+//        std::cout << "Enter input dir path:" << std::endl;
+//        std::cin.getline(ipath, 512);
+//    }
+//    if (odir == nullptr) {
+//        odir_n = false;
+//        odir = "output";
+//    }
+//
+//    if (maskspec == nullptr) {
+//        maskspec_n = false;
+//        maskspec = ".pdf";
+//    }
+//
+//    if (vspec == nullptr) {
+//        vspec_n = false;
+//        vspec = ".mp4";
+//    }
+//
+//    if (aspec == nullptr) {
+//        aspec_n = false;
+//        aspec = ".mp3";
+//    }
+//
+//
+//    LOGD("%s", ipath);
+//
+//    DirUtil *dir = new DirUtil(ipath);
+//    dir->setVideospec(vspec);
+//    dir->setAudiospec(aspec);
+//    std::vector<std::string> filenames;
+//    dir->GetTargetFiles(filenames, maskspec);
+//    dir->PreProcess(filenames, maskspec);
+//    AVMuxer muxer = AVMuxer(dir, odir);
+//    muxer.MuxAV();
+//    delete dir;
+//    if (ipath_n)
+//        delete[] ipath;
 
 
     return 0;
