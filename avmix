@@ -1,0 +1,167 @@
+#!/bin/bash
+
+function FileSuffix() {
+    local filename="$1"
+    if [ -n "$filename" ]; then
+        echo "${filename##*.}"
+    fi
+}
+
+function FilePrefix() {
+    local filename="$1"
+    if [ -n "$filename" ]; then
+        echo "${filename%.*}"
+    fi
+}
+
+
+function CheckPath() {
+    local output_path="$1"
+    if [ ! -d $output_path ];then
+      mkdir -p $output_path
+    fi
+}
+
+function ErrorPrinter(){
+  # echo -e "\033[41;37m[ERROR] $1 \033[0m"
+  echo -e "\033[31m[ERROR] $1 \033[0m"
+}
+
+function WarningPrinter(){
+  # echo -e "\033[43;37m[Warning] $1 \033[0m"
+  echo -e "\033[33m[Warning] $1 \033[0m"
+}
+
+function InfoPrinter(){
+  # echo -e "\033[44;37m[INFO] $1 \033[0m"
+  echo -e "\033[34m[INFO] $1 \033[0m"
+}
+
+function PrintHelp() {
+    echo \
+"avmix version: $avmix_version
+Usage: nginx [-?hvg] [-i path] [-o path]
+    [-f format] [-a format] [-v format]
+
+Options:
+  -?,-h                   : this help
+  -V,--version            : show version and exit
+  -g, --gpu               : use gpu while encode and decode
+  -i,--input=path         : set output path (default: \$pwd)
+  -o,--output=path        : set output path (default: \$input_path/output)
+  -f,--mix_fmt=FORMAT     : set the mixed video format
+  -a,--audio_fmt=FORMAT   : set audio format to be mixed
+  -v,--video_fmt=FORMAT   : set video format to be mixed"
+    exit
+}
+
+avmix_version="avmix/0.0.2"
+
+input_path=`pwd`
+output_path="./output"
+EXEC_PARAMS=(${@:1})
+param_num=${#EXEC_PARAMS[*]}
+current_path=`pwd`
+use_gpu=false
+
+output_format="mp4"
+video_format="mp4"
+audio_format="mp3"
+
+
+for((i=0;i<${#EXEC_PARAMS[*]};i++));do
+  param=${EXEC_PARAMS[$i]}
+  param_n=${EXEC_PARAMS[$i+1]}
+  
+  if [ "$param" = "-h" -o "$param" = "--help" -o "$param" = "-?" ];then
+    PrintHelp
+  elif [ "$param" = "-V" -o "$param" = "--version" ];then
+    echo $avmix_version
+    exit
+  elif [ "$param" = "-g" -o "$param" = "--gpu" ];then
+    use_gpu=true
+  elif [ "$param" = "-i" -o "$param" = "--input" ];then
+    [ ! $param_n ] && ErrorPrinter "parameter of input path could not be null" && PrintHelp && exit
+    input_path=$param_n
+    i++
+  elif [ "$param" = "-o" -o "$param" = "--output" ]; then
+    [ ! $param_n ] && ErrorPrinter "parameter of output path could not be null" && PrintHelp && exit
+    output_path=$param_n
+    i++
+  elif [ "$param" = "-f" -o "$param" = "--mix_fmt" ];then
+    [ ! $param_n ] && ErrorPrinter "parameter of output format could not be null" && PrintHelp && exit
+    output_format=$param_n
+    i++
+  elif [ "$param" = "-v" -o "$param" = "--video_fmt" ];then
+    [ ! $param_n ] && ErrorPrinter "parameter of video format could not be null" && PrintHelp && exit
+    video_format=$param_n
+    i++
+  elif [ "$param" = "-a" -o "$param" = "--audio_fmt" ];then
+    [ ! $param_n ] && ErrorPrinter "parameter of audio format could not be null" && PrintHelp && exit
+    audio_format=$param_n
+    i++
+  else
+    ErrorPrinter "parameter $param unknown"
+    PrintHelp
+  fi
+done
+
+input_path=$(readlink -e $input_path)
+
+if [[ "$output_path" =~ "^./".* ]]; then
+  output_path=$current_path${output_path: 1 }
+elif ! expr "$output_path" : '^\/' > /dev/null ; then
+  output_path=$current_path"/"$output_path
+fi
+if expr "$output_path" : '.*\/$' > /dev/null;then
+  output_path=${output_path: :-1}
+fi
+
+if [ "$output_path" = "$input_path" ]; then
+  ErrorPrinter output path should be different from input path 
+  exit
+fi
+
+if expr "$output_format" : '[^\.]' > /dev/null;then
+  output_format="."$output_format
+fi
+if expr "$video_format" : '[^\.]' > /dev/null;then
+  video_format="."$video_format
+fi
+if expr "$audio_format" : '[^\.]' > /dev/null;then
+  audio_format="."$audio_format
+fi
+
+# if [ "$video_format" = "$audio_format" ]; then
+#   ErrorPrinter video format should be different from audio format
+#   exit
+# fi
+
+if command -v ffmpeg >/dev/null 2>&1;then 
+   InfoPrinter ffmpeg detece
+else 
+   ErrorPrinter ffmpeg not detece
+   exit
+fi
+
+CheckPath $output_path
+output_path=$(readlink -e $output_path)
+
+if [ "$output_path" = "$input_path" ]; then
+  ErrorPrinter output path should be different from input path 
+  exit
+fi
+
+InfoPrinter -e "output: "$output_path"\ninput: "$input_path"\noutput format: "$output_format
+
+for f in `ls $input_path`; do
+    if [ ".""$(FileSuffix ${f})" = "$video_format" ] && [ -f $input_path"/""$(FilePrefix ${f})""$audio_format" ]; then
+      InfoPrinter "output: "$output_path"/"$(FilePrefix ${f})$output_format"\ninput: "$input_path"/"$f
+      if [ $video_format == $output_format ]; then
+        ffmpeg -i $input_path$"/"$f  -i $input_path"/"$(FilePrefix ${f})".mp3" -vcodec copy -acodec copy $output_path"/"$(FilePrefix ${f})$output_format -y
+      else
+        use_gpu && WarningPrinter "encoding and decoding with gpu have not supported yet!"
+        ffmpeg -i $input_path$"/"$f  -i $input_path"/"$(FilePrefix ${f})".mp3" -vcodec copy -acodec copy $output_path"/"$(FilePrefix ${f})$output_format -y
+      fi
+    fi
+done
